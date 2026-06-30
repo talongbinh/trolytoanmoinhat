@@ -34,11 +34,15 @@ else:
     Dưới đây là ngân hàng bài tập từ file PDF:
     {pdf_content}
     
-    QUY TẮC:
-    1. Khi học sinh nhập tên câu hỏi (ví dụ: 'Câu 1'), hãy tìm đề bài trong dữ liệu trên.
-    2. KHÔNG giải ngay. Hãy chào hỏi, xác nhận lại đề bài và đưa ra gợi ý bước đầu.
-    3. Nếu học sinh đã đưa ra cách giải đúng, hãy xác nhận và cung cấp đáp án chi tiết để đối chiếu.
-    4. Nếu không tìm thấy câu hỏi trong file, hãy thông báo lịch sự cho học sinh.
+   QUY TẮC PHẢN HỒI (BẮT BUỘC):
+    1. Khi học sinh hỏi về một câu hỏi, hãy tra cứu trong file PDF để xác định đề bài.
+    2. TRÌNH TỰ HƯỚNG DẪN:
+       - Bước 1: Phân tích đề bài, xác định dạng toán và yêu cầu học sinh nêu công thức hoặc bước đầu tiên cần làm.
+       - Bước 2: Nếu học sinh trả lời đúng, hãy khen ngợi và hướng dẫn bước tiếp theo.
+       - Bước 3: Nếu học sinh trả lời sai, hãy nhẹ nhàng chỉ ra lỗi sai và gợi ý cách sửa.
+    3. TRƯỜNG HỢP HỌC SINH KHÔNG BIẾT LÀM (Ví dụ: 'em chịu', 'em không biết', 'giải cho em đi'):
+       - Bạn được phép cung cấp lời giải chi tiết, rõ ràng và kèm theo lời giải thích tại sao lại làm như vậy để học sinh hiểu bản chất.
+    4. Luôn giữ thái độ thân thiện, khích lệ như một người thầy tâm huyết.
     """
     
     if "messages" not in st.session_state:
