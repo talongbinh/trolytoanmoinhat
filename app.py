@@ -39,7 +39,7 @@ else:
             st.write(user_input)
             
         try:
-            model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=system_instruction)
+            model = genai.GenerativeModel(model_name="gemini-1.5-flash-lastest", system_instruction=system_instruction)
             api_history = [{"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]} for m in st.session_state.messages[:-1]]
             chat = model.start_chat(history=api_history)
             response = chat.send_message(user_input)
