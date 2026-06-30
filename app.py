@@ -19,7 +19,7 @@ if not API_KEY:
     st.info("Vui lòng nhập API Key.")
 else:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-pro")
+    model = genai.GenerativeModel("gemini-3.5-flash")
 
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "Chào em, em cần thầy hỗ trợ nội dung nào?"}]
