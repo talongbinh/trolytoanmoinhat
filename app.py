@@ -59,7 +59,7 @@ else:
             
         try:
             # Đã cập nhật đúng tên model là gemini-2.5-flash theo yêu cầu
-            model = genai.GenerativeModel(model_name="gemini-2.5-flash", system_instruction=system_instruction)
+            model = genai.GenerativeModel(model_name="gemini-3.5-flash", system_instruction=system_instruction)
             chat = model.start_chat(history=[])
             response = chat.send_message(user_input)
             
