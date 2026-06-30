@@ -2,69 +2,60 @@ import streamlit as st
 import google.generativeai as genai
 from pypdf import PdfReader
 
-# Cấu hình trang
 st.set_page_config(page_title="Trợ lý Học tập - Thầy Long Bình", page_icon="🤖")
 
-st.title("🤖 Trợ Lý Học Tập Toán")
-st.subheader("Trường THCS Hoàng Văn Thụ - Thầy Long Bình")
-
-# Hàm đọc file PDF
+# Hàm đọc PDF
 def get_pdf_text(pdf_file_path):
     try:
         reader = PdfReader(pdf_file_path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-        return text
-    except Exception as e:
-        return f"Lỗi đọc file: {e}"
+        return "\n".join([page.extract_text() for page in reader.pages])
+    except: return ""
 
-# Load dữ liệu từ PDF
 pdf_content = get_pdf_text("Test.pdf")
 
 API_KEY = st.sidebar.text_input("Mã API Key:", type="password")
 
 if not API_KEY:
-    st.info("Vui lòng điền mã API Key để bắt đầu.")
+    st.info("Vui lòng nhập API Key.")
 else:
     genai.configure(api_key=API_KEY)
-    
-    system_instruction = f"""
-    Bạn là trợ lý học tập của thầy Long Bình (THCS Hoàng Văn Thụ). 
-    Dưới đây là ngân hàng bài tập từ file PDF:
-    {pdf_content}
-    
-   QUY TẮC PHẢN HỒI (BẮT BUỘC):
-    1. Khi học sinh hỏi về một câu hỏi, hãy tra cứu trong file PDF để xác định đề bài.
-    2. TRÌNH TỰ HƯỚNG DẪN:
-       - Bước 1: Phân tích đề bài, xác định dạng toán và yêu cầu học sinh nêu công thức hoặc bước đầu tiên cần làm.
-       - Bước 2: Nếu học sinh trả lời đúng, hãy khen ngợi và hướng dẫn bước tiếp theo.
-       - Bước 3: Nếu học sinh trả lời sai, hãy nhẹ nhàng chỉ ra lỗi sai và gợi ý cách sửa.
-    3. TRƯỜNG HỢP HỌC SINH KHÔNG BIẾT LÀM (Ví dụ: 'em chịu', 'em không biết', 'giải cho em đi'):
-       - Bạn được phép cung cấp lời giải chi tiết, rõ ràng và kèm theo lời giải thích tại sao lại làm như vậy để học sinh hiểu bản chất.
-    4. Luôn giữ thái độ thân thiện, khích lệ như một người thầy tâm huyết.
-    """
-    
+    model = genai.GenerativeModel("gemini-1.5-pro")
+
     if "messages" not in st.session_state:
-        st.session_state.messages = []
-        
+        st.session_state.messages = [{"role": "assistant", "content": "Chào em, em cần thầy hỗ trợ nội dung nào?"}]
+        st.session_state.mode = None # Lưu trạng thái: 'hint' hoặc 'answer'
+
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if user_input := st.chat_input("Nhập tên câu cần hỏi (ví dụ: Câu 1)..."):
+    if user_input := st.chat_input("Nhập yêu cầu của em..."):
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.write(user_input)
-            
-        try:
-            # Đã cập nhật đúng tên model là gemini-2.5-flash theo yêu cầu
-            model = genai.GenerativeModel(model_name="gemini-3.5-flash", system_instruction=system_instruction)
-            chat = model.start_chat(history=[])
-            response = chat.send_message(user_input)
-            
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-            with st.chat_message("assistant"):
-                st.write(response.text)
-        except Exception as e:
-            st.error(f"Lỗi hệ thống (Vui lòng kiểm tra lại API Key hoặc quyền truy cập model): {e}")
+
+        # Xử lý logic theo bước
+        # Bước 2: Phân loại yêu cầu
+        if "giải" in user_input.lower() and st.session_state.mode is None:
+            response = "Em muốn được gợi ý giải từng bước hay muốn thầy cung cấp kết quả của cả bài?"
+            st.session_state.mode = "choosing"
+        
+        # Bước 3: Phân nhánh Gợi ý hoặc Đáp án
+        elif st.session_state.mode == "choosing":
+            if "gợi ý" in user_input.lower():
+                st.session_state.mode = "hint"
+                response = "Được rồi, chúng ta bắt đầu từng bước nhé. Với câu hỏi này, em hãy thử nêu hướng giải quyết đầu tiên hoặc công thức cần sử dụng xem nào?"
+            else:
+                st.session_state.mode = "answer"
+                response = f"Đây là đáp án chính xác:\n\n{pdf_content}\n\n(Lưu ý: Thầy đã trích xuất đáp án từ file đề bài)."
+        
+        # Bước 4: Gợi ý tiếp hoặc nhận xét
+        else:
+            prompt = f"""Dựa vào nội dung đề bài sau: {pdf_content}.
+            Hãy đóng vai thầy giáo, thực hiện tiếp việc hướng dẫn học sinh giải bài tập '{user_input}'.
+            Nếu học sinh đã làm xong, hãy nhận xét chính xác dựa trên đáp án trong đề bài."""
+            response = model.generate_content(prompt).text
+
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        with st.chat_message("assistant"):
+            st.write(response)
