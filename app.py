@@ -5,7 +5,7 @@ from pypdf import PdfReader
 # Cấu hình trang
 st.set_page_config(page_title="Trợ lý Học tập - Thầy Long Bình", page_icon="🤖")
 
-st.title("🤖 Trợ Lý Học Tập Toán & KHTN")
+st.title("🤖 Trợ Lý Học Tập Toán")
 st.subheader("Trường THCS Hoàng Văn Thụ - Thầy Long Bình")
 
 # Hàm đọc file PDF
